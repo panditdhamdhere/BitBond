@@ -182,3 +182,20 @@ export function validateBondParams(amount: number, lockPeriod: LockPeriod): {
   
   return { isValid: true }
 }
+
+/**
+ * Calculate maturity date based on lock period (returns Date object)
+ */
+export function calculateMaturityDateFromNow(lockPeriod: LockPeriod): Date {
+  const now = new Date()
+  const maturityDate = new Date(now.getTime() + lockPeriod * 24 * 60 * 60 * 1000)
+  return maturityDate
+}
+
+/**
+ * Calculate total return (principal + yield)
+ */
+export function calculateTotalReturn(amount: number, lockPeriod: LockPeriod): number {
+  const yieldAmount = calculateYield(amount, lockPeriod)
+  return amount + yieldAmount
+}
