@@ -16,6 +16,12 @@ import {
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'marketplace'>('dashboard')
   const [mounted, setMounted] = useState(false)
+  // Mock protocol stats; in production, fetch from analytics/stacksClient
+  const [tvlBtc, setTvlBtc] = useState(152.34)
+  const [btcUsd, setBtcUsd] = useState(65000) // mock price
+  const [bondsCreated, setBondsCreated] = useState(245)
+  const [activeBonds, setActiveBonds] = useState(172)
+  const [avgApy, setAvgApy] = useState(8.4)
 
   useEffect(() => {
     const id = requestAnimationFrame(() => setMounted(true))
@@ -101,6 +107,20 @@ export default function HomePage() {
               <p className="text-slate-600">Buy and sell bonds before maturity</p>
             </div>
           </div>
+
+          {/* Stats Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-4" role="region" aria-label="Protocol stats">
+            <Stat
+              label="TVL"
+              valuePrefix=""
+              value={tvlBtc}
+              suffix=" BTC"
+              sub={`$${(tvlBtc * btcUsd).toLocaleString(undefined, { maximumFractionDigits: 0 })} USD`}
+            />
+            <Stat label="Total Bonds" value={bondsCreated} integer />
+            <Stat label="Active Bonds" value={activeBonds} integer />
+            <Stat label="Average APY" value={avgApy} suffix="%" />
+          </div>
         </div>
       </section>
 
@@ -162,6 +182,38 @@ export default function HomePage() {
           </p>
         </div>
       </footer>
+    </div>
+  )
+}
+
+function Stat({ label, value, valuePrefix = '', suffix = '', sub, integer = false }: { label: string; value: number; valuePrefix?: string; suffix?: string; sub?: string; integer?: boolean }) {
+  const [display, setDisplay] = useState(0)
+
+  useEffect(() => {
+    let frame: number
+    const duration = 800
+    const start = performance.now()
+    const from = 0
+    const to = value
+    const step = (now: number) => {
+      const t = Math.min(1, (now - start) / duration)
+      const eased = 1 - Math.pow(1 - t, 3)
+      setDisplay(from + (to - from) * eased)
+      if (t < 1) frame = requestAnimationFrame(step)
+    }
+    frame = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(frame)
+  }, [value])
+
+  const formatted = integer ? Math.round(display).toLocaleString() : display.toFixed(2)
+
+  return (
+    <div className="bg-white/60 backdrop-blur-md rounded-xl border border-slate-200 p-5 text-left">
+      <div className="text-sm text-slate-600 mb-1">{label}</div>
+      <div className="text-3xl font-extrabold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+        {valuePrefix}{formatted}{suffix}
+      </div>
+      {sub && <div className="text-slate-500 text-sm mt-1">{sub}</div>}
     </div>
   )
 }
