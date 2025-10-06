@@ -43,9 +43,12 @@ export default function HomePage() {
               <div className="w-8 h-8 bg-bitcoin-gradient rounded-lg flex items-center justify-center">
                 <TrendingUp className="w-5 h-5 text-white" />
               </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
-                BitBond
-              </h1>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
+                  BitBond
+                </h1>
+                <p className="text-xs text-slate-500">Liquid Bonds for Bitcoin</p>
+              </div>
             </div>
             <ConnectWallet />
           </div>
@@ -84,24 +87,24 @@ export default function HomePage() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             <div className="group bg-white/60 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:border-orange-200 hover:bg-white/70 hover:ring-1 hover:ring-orange-200/50">
-              <div className="w-12 h-12 bg-bitcoin-gradient rounded-lg flex items-center justify-center mx-auto mb-4 transition-transform duration-300 group-hover:scale-105">
-                <Shield className="w-6 h-6 text-white group-hover:animate-pulse" />
+              <div className="w-14 h-14 bg-bitcoin-gradient rounded-lg flex items-center justify-center mx-auto mb-4 transition-transform duration-300 group-hover:scale-105">
+                <Shield className="w-7 h-7 text-white group-hover:animate-pulse" />
               </div>
               <h3 className="text-lg font-semibold mb-2">Guaranteed Yields</h3>
               <p className="text-slate-600">5% APY (30d), 8% APY (90d), 12% APY (180d)</p>
             </div>
             
             <div className="group bg-white/60 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:border-orange-200 hover:bg-white/70 hover:ring-1 hover:ring-orange-200/50">
-              <div className="w-12 h-12 bg-stacks-gradient rounded-lg flex items-center justify-center mx-auto mb-4 transition-transform duration-300 group-hover:scale-105">
-                <Wallet className="w-6 h-6 text-white group-hover:animate-pulse" />
+              <div className="w-14 h-14 bg-stacks-gradient rounded-lg flex items-center justify-center mx-auto mb-4 transition-transform duration-300 group-hover:scale-105">
+                <Wallet className="w-7 h-7 text-white group-hover:animate-pulse" />
               </div>
               <h3 className="text-lg font-semibold mb-2">Tradeable NFTs</h3>
               <p className="text-slate-600">Each bond is represented by a unique NFT</p>
             </div>
             
             <div className="group bg-white/60 backdrop-blur-md rounded-xl shadow-lg border border-slate-200 p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:border-orange-200 hover:bg-white/70 hover:ring-1 hover:ring-orange-200/50">
-              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center mx-auto mb-4 transition-transform duration-300 group-hover:scale-105">
-                <TrendingUp className="w-6 h-6 text-white group-hover:animate-pulse" />
+              <div className="w-14 h-14 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center mx-auto mb-4 transition-transform duration-300 group-hover:scale-105">
+                <TrendingUp className="w-7 h-7 text-white group-hover:animate-pulse" />
               </div>
               <h3 className="text-lg font-semibold mb-2">Secondary Market</h3>
               <p className="text-slate-600">Buy and sell bonds before maturity</p>
