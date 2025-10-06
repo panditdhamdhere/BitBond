@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, lazy, useState } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import ConnectWallet from '@/components/ConnectWallet'
 const Dashboard = lazy(() => import('@/components/Dashboard').then(m => ({ default: m.Dashboard })))
 const Marketplace = lazy(() => import('@/components/Marketplace').then(m => ({ default: m.Marketplace })))
@@ -9,11 +9,18 @@ import {
   Shield, 
   BarChart3, 
   ShoppingCart,
-  Wallet
+  Wallet,
+  Bitcoin
 } from 'lucide-react'
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'marketplace'>('dashboard')
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setMounted(true))
+    return () => cancelAnimationFrame(id)
+  }, [])
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
@@ -40,7 +47,25 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section
+        className={`relative py-20 px-4 sm:px-6 lg:px-8 transition-opacity duration-700 ${mounted ? 'opacity-100' : 'opacity-0'}`}
+        style={{
+          backgroundImage:
+            'radial-gradient(1200px 600px at 50% -10%, rgba(247,147,26,0.10), rgba(255,255,255,0.9) 40%, rgba(255,255,255,0.98) 70%)'
+        }}
+      >
+        {/* Floating subtle Bitcoin icons */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -top-10 -left-10 opacity-10">
+            <Bitcoin className="w-40 h-40 text-orange-400 animate-[spin_60s_linear_infinite]" />
+          </div>
+          <div className="absolute top-1/3 -right-10 opacity-10">
+            <Bitcoin className="w-24 h-24 text-orange-300 animate-[spin_75s_linear_infinite]" />
+          </div>
+          <div className="absolute bottom-0 left-1/3 opacity-10">
+            <Bitcoin className="w-28 h-28 text-orange-200 animate-[spin_90s_linear_infinite]" />
+          </div>
+        </div>
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-5xl font-bold text-slate-900 mb-6">
             Bitcoin Liquidity Bonds on{' '}
