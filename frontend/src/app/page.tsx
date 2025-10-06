@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, lazy, useState } from 'react'
 import ConnectWallet from '@/components/ConnectWallet'
-import { Dashboard } from '@/components/Dashboard'
-import { Marketplace } from '@/components/Marketplace'
+const Dashboard = lazy(() => import('@/components/Dashboard').then(m => ({ default: m.Dashboard })))
+const Marketplace = lazy(() => import('@/components/Marketplace').then(m => ({ default: m.Marketplace })))
 import { 
   TrendingUp, 
   Shield, 
@@ -83,18 +83,22 @@ export default function HomePage() {
       <section className="py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Tab Navigation */}
-          <div className="flex space-x-1 bg-slate-100 p-1 rounded-lg mb-8 max-w-md mx-auto">
+          <div className="flex space-x-1 bg-slate-100 p-1 rounded-lg mb-8 max-w-md mx-auto" role="tablist" aria-label="Primary navigation">
             {tabs.map((tab) => {
               const Icon = tab.icon
               return (
                 <button
                   key={tab.id}
-                      onClick={() => setActiveTab(tab.id as 'dashboard' | 'marketplace')}
-                  className={`flex-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-md transition-all ${
+                  onClick={() => setActiveTab(tab.id as 'dashboard' | 'marketplace')}
+                  role="tab"
+                  aria-selected={activeTab === tab.id}
+                  aria-controls={`panel-${tab.id}`}
+                  className={`flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
                     activeTab === tab.id
                       ? 'bg-white shadow-sm text-slate-900'
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
+                  style={{ minHeight: 44 }}
                 >
                   <Icon className="w-4 h-4" />
                   <span className="font-medium">{tab.label}</span>
@@ -105,8 +109,22 @@ export default function HomePage() {
 
           {/* Tab Content */}
           <div className="min-h-[600px]">
-            {activeTab === 'dashboard' && <Dashboard />}
-            {activeTab === 'marketplace' && <Marketplace />}
+            <Suspense fallback={<div className="grid gap-6 animate-pulse" aria-busy="true" aria-live="polite">
+              <div className="h-40 bg-slate-200 rounded-xl" />
+              <div className="h-40 bg-slate-200 rounded-xl" />
+              <div className="h-40 bg-slate-200 rounded-xl" />
+            </div>}>
+              {activeTab === 'dashboard' && (
+                <div id="panel-dashboard" role="tabpanel" aria-labelledby="dashboard">
+                  <Dashboard />
+                </div>
+              )}
+              {activeTab === 'marketplace' && (
+                <div id="panel-marketplace" role="tabpanel" aria-labelledby="marketplace">
+                  <Marketplace />
+                </div>
+              )}
+            </Suspense>
           </div>
         </div>
       </section>
