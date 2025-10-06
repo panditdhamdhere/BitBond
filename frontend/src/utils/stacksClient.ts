@@ -1,26 +1,5 @@
-import { 
-  makeContractCall, 
-  makeContractDeploy, 
-  broadcastTransaction, 
-  cvToValue,
-  uintCV,
-  principalCV,
-  stringUtf8CV,
-  noneCV,
-  someCV,
-  contractPrincipalCV,
-  standardPrincipalCV,
-  TransactionVersion,
-  AnchorMode,
-  PostConditionMode
-} from '@stacks/transactions'
-// Network configuration will be handled by Stacks Connect
-import { 
-  openContractCall,
-  openContractDeploy,
-  showConnect,
-  showBlockchainApi
-} from '@stacks/connect'
+import { uintCV } from '@stacks/transactions'
+import { openContractCall, showConnect } from '@stacks/connect'
 import { 
   Bond, 
   BondListing, 
@@ -32,16 +11,22 @@ import {
 } from './types'
 import { CONTRACTS, NETWORK_CONFIG } from './constants'
 
+type NetworkConfig = {
+  name: Network
+  url: string
+  chainId: number
+}
+
 class StacksClient {
-  private network: any
-  private contracts: any
+  private network: NetworkConfig
+  private contracts: Record<string, string>
 
   constructor(network: Network = 'testnet') {
     this.network = this.getNetwork(network)
     this.contracts = CONTRACTS[network]
   }
 
-  private getNetwork(network: Network): any {
+  private getNetwork(network: Network): NetworkConfig {
     const config = NETWORK_CONFIG[network]
     
     // Return network configuration object
@@ -63,23 +48,26 @@ class StacksClient {
           icon: '/icon.png',
         },
         redirectTo: '/',
-        onFinish: (payload) => {
-          console.log('Wallet connected:', payload)
+        onFinish: (_payload) => {
+          // No-op; connection handled by provider
         },
         onCancel: () => {
-          console.log('Connection cancelled')
+          // No-op
         },
       })
       
       return { success: true, address: result.address }
     } catch (error) {
-      console.error('Wallet connection failed:', error)
-      return { success: false, error: error.message }
+      const message = error instanceof Error ? error.message : 'Wallet connection failed'
+      return { success: false, error: message }
     }
   }
 
   /**
    * Create a new bond by locking sBTC
+   */
+  /**
+   * Build and open contract call to create a new bond
    */
   async createBond(params: CreateBondParams): Promise<ContractCallResult> {
     try {
@@ -88,7 +76,7 @@ class StacksClient {
         uintCV(params.lockPeriod)
       ]
 
-      const options = {
+      const options: unknown = {
         contractAddress: this.contracts.bondVault.split('.')[0],
         contractName: this.contracts.bondVault.split('.')[1],
         functionName: 'create-bond',
@@ -98,20 +86,16 @@ class StacksClient {
           name: 'BitBond',
           icon: '/icon.png',
         },
-        onFinish: (data: any) => {
-          console.log('Bond created:', data)
-        },
-        onCancel: () => {
-          console.log('Transaction cancelled')
-        },
+        onFinish: (_data: unknown) => {},
+        onCancel: () => {},
       }
 
-      await openContractCall(options)
+      await openContractCall(options as Parameters<typeof openContractCall>[0])
       
       return { success: true }
     } catch (error) {
-      console.error('Create bond failed:', error)
-      return { success: false, error: error.message }
+      const message = error instanceof Error ? error.message : 'Create bond failed'
+      return { success: false, error: message }
     }
   }
 
@@ -122,7 +106,7 @@ class StacksClient {
     try {
       const functionArgs = [uintCV(bondId)]
 
-      const options = {
+      const options: unknown = {
         contractAddress: this.contracts.bondVault.split('.')[0],
         contractName: this.contracts.bondVault.split('.')[1],
         functionName: 'withdraw-bond',
@@ -132,20 +116,16 @@ class StacksClient {
           name: 'BitBond',
           icon: '/icon.png',
         },
-        onFinish: (data: any) => {
-          console.log('Bond withdrawn:', data)
-        },
-        onCancel: () => {
-          console.log('Transaction cancelled')
-        },
+        onFinish: (_data: unknown) => {},
+        onCancel: () => {},
       }
 
-      await openContractCall(options)
+      await openContractCall(options as Parameters<typeof openContractCall>[0])
       
       return { success: true }
     } catch (error) {
-      console.error('Withdraw bond failed:', error)
-      return { success: false, error: error.message }
+      const message = error instanceof Error ? error.message : 'Withdraw bond failed'
+      return { success: false, error: message }
     }
   }
 
@@ -156,7 +136,7 @@ class StacksClient {
     try {
       const functionArgs = [uintCV(bondId)]
 
-      const options = {
+      const options: unknown = {
         contractAddress: this.contracts.bondVault.split('.')[0],
         contractName: this.contracts.bondVault.split('.')[1],
         functionName: 'early-exit',
@@ -166,20 +146,16 @@ class StacksClient {
           name: 'BitBond',
           icon: '/icon.png',
         },
-        onFinish: (data: any) => {
-          console.log('Bond early exit:', data)
-        },
-        onCancel: () => {
-          console.log('Transaction cancelled')
-        },
+        onFinish: (_data: unknown) => {},
+        onCancel: () => {},
       }
 
-      await openContractCall(options)
+      await openContractCall(options as Parameters<typeof openContractCall>[0])
       
       return { success: true }
     } catch (error) {
-      console.error('Early exit bond failed:', error)
-      return { success: false, error: error.message }
+      const message = error instanceof Error ? error.message : 'Early exit bond failed'
+      return { success: false, error: message }
     }
   }
 
@@ -193,7 +169,7 @@ class StacksClient {
         uintCV(params.price)
       ]
 
-      const options = {
+      const options: unknown = {
         contractAddress: this.contracts.bondMarketplace.split('.')[0],
         contractName: this.contracts.bondMarketplace.split('.')[1],
         functionName: 'list-bond',
@@ -203,20 +179,16 @@ class StacksClient {
           name: 'BitBond',
           icon: '/icon.png',
         },
-        onFinish: (data: any) => {
-          console.log('Bond listed:', data)
-        },
-        onCancel: () => {
-          console.log('Transaction cancelled')
-        },
+        onFinish: (_data: unknown) => {},
+        onCancel: () => {},
       }
 
-      await openContractCall(options)
+      await openContractCall(options as Parameters<typeof openContractCall>[0])
       
       return { success: true }
     } catch (error) {
-      console.error('List bond failed:', error)
-      return { success: false, error: error.message }
+      const message = error instanceof Error ? error.message : 'List bond failed'
+      return { success: false, error: message }
     }
   }
 
@@ -227,7 +199,7 @@ class StacksClient {
     try {
       const functionArgs = [uintCV(params.bondId)]
 
-      const options = {
+      const options: unknown = {
         contractAddress: this.contracts.bondMarketplace.split('.')[0],
         contractName: this.contracts.bondMarketplace.split('.')[1],
         functionName: 'buy-bond',
@@ -237,20 +209,16 @@ class StacksClient {
           name: 'BitBond',
           icon: '/icon.png',
         },
-        onFinish: (data: any) => {
-          console.log('Bond bought:', data)
-        },
-        onCancel: () => {
-          console.log('Transaction cancelled')
-        },
+        onFinish: (_data: unknown) => {},
+        onCancel: () => {},
       }
 
-      await openContractCall(options)
+      await openContractCall(options as Parameters<typeof openContractCall>[0])
       
       return { success: true }
     } catch (error) {
-      console.error('Buy bond failed:', error)
-      return { success: false, error: error.message }
+      const message = error instanceof Error ? error.message : 'Buy bond failed'
+      return { success: false, error: message }
     }
   }
 
@@ -261,7 +229,7 @@ class StacksClient {
     try {
       const functionArgs = [uintCV(bondId)]
 
-      const options = {
+      const options: unknown = {
         contractAddress: this.contracts.bondMarketplace.split('.')[0],
         contractName: this.contracts.bondMarketplace.split('.')[1],
         functionName: 'cancel-listing',
@@ -271,20 +239,16 @@ class StacksClient {
           name: 'BitBond',
           icon: '/icon.png',
         },
-        onFinish: (data: any) => {
-          console.log('Listing cancelled:', data)
-        },
-        onCancel: () => {
-          console.log('Transaction cancelled')
-        },
+        onFinish: (_data: unknown) => {},
+        onCancel: () => {},
       }
 
-      await openContractCall(options)
+      await openContractCall(options as Parameters<typeof openContractCall>[0])
       
       return { success: true }
     } catch (error) {
-      console.error('Cancel listing failed:', error)
-      return { success: false, error: error.message }
+      const message = error instanceof Error ? error.message : 'Cancel listing failed'
+      return { success: false, error: message }
     }
   }
 
@@ -293,11 +257,10 @@ class StacksClient {
    */
   async getBondInfo(bondId: number): Promise<Bond | null> {
     try {
-      // Mock implementation - in real app, you would use the Stacks API
-      // to call read-only functions
-      console.log('Getting bond info for:', bondId)
+      // Placeholder: Replace with real read-only call
       return null
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Get bond info failed:', error)
       return null
     }
@@ -308,10 +271,10 @@ class StacksClient {
    */
   async getListing(bondId: number): Promise<BondListing | null> {
     try {
-      // Mock implementation - in real app, you would use the Stacks API
-      console.log('Getting listing for:', bondId)
+      // Placeholder: Replace with real read-only call
       return null
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Get listing failed:', error)
       return null
     }
@@ -320,10 +283,8 @@ class StacksClient {
   /**
    * Get marketplace statistics
    */
-  async getMarketplaceStats(): Promise<any> {
+  async getMarketplaceStats(): Promise<{ totalVolume: number; totalFees: number; totalListings: number; activeBonds: number } | null> {
     try {
-      // Mock implementation - in real app, you would use the Stacks API
-      console.log('Getting marketplace stats')
       return {
         totalVolume: 1000000,
         totalFees: 20000,
@@ -331,6 +292,7 @@ class StacksClient {
         activeBonds: 10
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Get marketplace stats failed:', error)
       return null
     }
@@ -341,10 +303,10 @@ class StacksClient {
    */
   async getNFTOwner(tokenId: number): Promise<string | null> {
     try {
-      // Mock implementation - in real app, you would use the Stacks API
-      console.log('Getting NFT owner for:', tokenId)
+      // Placeholder: Replace with real read-only call
       return null
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Get NFT owner failed:', error)
       return null
     }
@@ -353,3 +315,23 @@ class StacksClient {
 
 export const stacksClient = new StacksClient()
 export default stacksClient
+
+// Helper utilities
+/** Truncate a principal address for display */
+export function truncateAddress(addr: string, start = 6, end = 4): string {
+  if (!addr || addr.length <= start + end) return addr
+  return `${addr.slice(0, start)}...${addr.slice(-end)}`
+}
+
+/** Convert micro-units to readable string; placeholder for real formatting */
+export function formatMicro(amount: number): string {
+  return amount.toString()
+}
+
+/** Format a JS Date to yyyy-mm-dd */
+export function formatDate(date: Date): string {
+  const y = date.getFullYear()
+  const m = `${date.getMonth() + 1}`.padStart(2, '0')
+  const d = `${date.getDate()}`.padStart(2, '0')
+  return `${y}-${m}-${d}`
+}

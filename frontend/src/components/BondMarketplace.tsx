@@ -79,7 +79,7 @@ export default function BondMarketplace() {
       await new Promise(r => setTimeout(r, 1200))
       toast.success('Purchase successful! 🎉')
       refreshListings()
-    } catch (e) {
+    } catch (_e) {
       toast.error('Purchase failed')
     } finally {
       setIsBuying(false)
@@ -128,28 +128,57 @@ export default function BondMarketplace() {
             </button>
           </div>
 
-          <select value={filterPeriod} onChange={(e) => setFilterPeriod(e.target.value as any)} className="px-3 py-2 border border-slate-300 rounded-lg">
+          <select
+            value={filterPeriod}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              const v = e.target.value
+              setFilterPeriod(v === 'all' ? 'all' : (Number(v) as 30 | 90 | 180))
+            }}
+            className="px-3 py-2 border border-slate-300 rounded-lg"
+          >
             <option value="all">All Periods</option>
             <option value="30">30 Days</option>
             <option value="90">90 Days</option>
             <option value="180">180 Days</option>
           </select>
 
-          <select value={filterDiscount} onChange={(e) => setFilterDiscount(e.target.value as any)} className="px-3 py-2 border border-slate-300 rounded-lg">
+          <select
+            value={filterDiscount}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              const v = e.target.value as 'all' | 'gt5' | 'gt10' | 'gt20'
+              setFilterDiscount(v)
+            }}
+            className="px-3 py-2 border border-slate-300 rounded-lg"
+          >
             <option value="all">Any Discount</option>
             <option value="gt5">≥ 5%</option>
             <option value="gt10">≥ 10%</option>
             <option value="gt20">≥ 20%</option>
           </select>
 
-          <select value={filterMaturity} onChange={(e) => setFilterMaturity(e.target.value as any)} className="px-3 py-2 border border-slate-300 rounded-lg">
+          <select
+            value={filterMaturity}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              const v = e.target.value as 'all' | 'lt7' | 'lt30' | 'gt30'
+              setFilterMaturity(v)
+            }}
+            className="px-3 py-2 border border-slate-300 rounded-lg"
+          >
             <option value="all">Any Maturity</option>
             <option value="lt7">&lt; 7 days</option>
             <option value="lt30">&lt; 30 days</option>
             <option value="gt30">≥ 30 days</option>
           </select>
 
-          <select value={`${sortBy}-${sortOrder}`} onChange={(e) => { const [f, o] = e.target.value.split('-'); setSortBy(f as any); setSortOrder(o as any) }} className="px-3 py-2 border border-slate-300 rounded-lg">
+          <select
+            value={`${sortBy}-${sortOrder}`}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              const [f, o] = e.target.value.split('-')
+              setSortBy(f as 'price' | 'discount' | 'maturity' | 'yield')
+              setSortOrder(o as 'asc' | 'desc')
+            }}
+            className="px-3 py-2 border border-slate-300 rounded-lg"
+          >
             <option value="discount-desc">Best Discount</option>
             <option value="discount-asc">Worst Discount</option>
             <option value="price-asc">Price: Low to High</option>

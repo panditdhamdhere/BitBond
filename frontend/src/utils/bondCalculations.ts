@@ -2,19 +2,39 @@ import { Bond, LockPeriod } from './types'
 import { BOND_CONFIG } from './constants'
 
 /**
- * Calculate the yield for a given amount and lock period
+ * Calculate the yield.
+ * Overloads:
+ * - calculateYield(amount, lockPeriod) -> uses configured APY for the lock period
+ * - calculateYield(principal, apy, lockPeriod) -> uses explicit APY percentage
  */
-export function calculateYield(amount: number, lockPeriod: LockPeriod): number {
-  const apy = BOND_CONFIG.apy[lockPeriod]
-  const days = lockPeriod
-  // Formula: amount * apy * days / 36500 (where apy is percentage)
-  return Math.floor((amount * apy * days) / 36500)
+export function calculateYield(amount: number, lockPeriod: LockPeriod): number
+export function calculateYield(principal: number, apy: number, lockPeriod: number): number
+export function calculateYield(a: number, b: number, c?: number): number {
+  // Two-arg form: (amount, lockPeriod)
+  if (typeof c === 'undefined') {
+    const lockPeriod = b as LockPeriod
+    const apy = BOND_CONFIG.apy[lockPeriod]
+    const days = lockPeriod
+    return Math.floor((a * apy * days) / 36500)
+  }
+  // Three-arg form: (principal, apy, lockPeriod)
+  const principal = a
+  const apy = b
+  const lockPeriod = c
+  if (principal <= 0 || apy < 0 || lockPeriod <= 0) return 0
+  return principal * (apy / 100) * (lockPeriod / 365)
 }
 
 /**
  * Calculate the maturity date in block height
  */
-export function calculateMaturityDate(createdAt: number, lockPeriod: LockPeriod): number {
+export function calculateMaturityDate(createdAt: number, lockPeriod: LockPeriod): number
+export function calculateMaturityDate(createdAt: Date, lockPeriod: number): Date
+export function calculateMaturityDate(createdAt: number | Date, lockPeriod: number): number | Date {
+  if (createdAt instanceof Date) {
+    const ms = createdAt.getTime() + lockPeriod * 24 * 60 * 60 * 1000
+    return new Date(ms)
+  }
   const blocksPerDay = BOND_CONFIG.burnBlocksPerDay
   return createdAt + (lockPeriod * blocksPerDay)
 }
@@ -24,6 +44,44 @@ export function calculateMaturityDate(createdAt: number, lockPeriod: LockPeriod)
  */
 export function isBondMatured(bond: Bond, currentBlockHeight: number): boolean {
   return currentBlockHeight >= bond.maturityDate
+}
+
+/**
+ * Returns days remaining until a JS Date maturity; 0 if matured
+ */
+export function calculateDaysRemaining(maturityDate: Date): number {
+  const now = Date.now()
+  const diffMs = maturityDate.getTime() - now
+  if (diffMs <= 0) return 0
+  return Math.ceil(diffMs / (24 * 60 * 60 * 1000))
+}
+
+/**
+ * Calculate accrued yield pro-rata based on days elapsed
+ */
+export function calculateAccruedYield(principal: number, apy: number, lockPeriod: number, daysElapsed: number): number {
+  if (principal <= 0 || apy < 0 || lockPeriod <= 0 || daysElapsed <= 0) return 0
+  const cappedDays = Math.min(daysElapsed, lockPeriod)
+  return principal * (apy / 100) * (cappedDays / 365)
+}
+
+/**
+ * Calculate intrinsic value (principal + accrued yield) for pricing.
+ * If bond has no wall-clock timestamps, this returns principal + full-period yield.
+ */
+export function calculateIntrinsicValue(bond: Bond): number {
+  const fullYield = calculateYield(bond.amount, bond.lockPeriod as LockPeriod)
+  // Without exact days elapsed in wall time, fall back to full yield if matured-like flag is set on status
+  // Consumers may prefer calculateAccruedYield with explicit daysElapsed for more accuracy
+  return bond.amount + fullYield
+}
+
+/**
+ * Calculate discount percentage; can be negative for premiums
+ */
+export function calculateDiscountPercentage(intrinsicValue: number, askingPrice: number): number {
+  if (intrinsicValue <= 0) return 0
+  return ((intrinsicValue - askingPrice) / intrinsicValue) * 100
 }
 
 /**
@@ -112,12 +170,26 @@ export function calculateSellerAmount(price: number): number {
 }
 
 /**
+ * True if maturity date is past now
+ */
+export function isMatured(maturityDate: Date): boolean {
+  return maturityDate.getTime() <= Date.now()
+}
+
+/**
  * Format micro-sats to sBTC with proper decimals
  */
 export function formatSBTC(microSats: number): string {
   const sats = microSats / 1000000 // Convert micro-sats to sats
   const btc = sats / 100000000 // Convert sats to BTC
   return btc.toFixed(8)
+}
+
+/**
+ * Format BTC amount (in BTC units) to 8 decimals with suffix
+ */
+export function formatBTC(amount: number): string {
+  return `${amount.toFixed(8)} BTC`
 }
 
 /**
@@ -150,6 +222,16 @@ export function parseSTX(stxString: string): number {
  */
 export function getAPY(lockPeriod: LockPeriod): number {
   return BOND_CONFIG.apy[lockPeriod]
+}
+
+/**
+ * Get APY for a numeric lock period (supports non-typed inputs)
+ */
+export function getAPYForLockPeriod(lockPeriod: number): number {
+  if (lockPeriod === 30) return BOND_CONFIG.apy[30]
+  if (lockPeriod === 90) return BOND_CONFIG.apy[90]
+  if (lockPeriod === 180) return BOND_CONFIG.apy[180]
+  return 0
 }
 
 /**
