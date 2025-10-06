@@ -1,0 +1,38 @@
+[project]
+name = "bitbond"
+description = "Bitcoin liquidity bonds protocol on Stacks"
+authors = ["BitBond Contributors"]
+telemetry = false
+
+[repl]
+costs_version = 2
+parser_version = 2
+
+[contracts.sbtc-token]
+path = "contracts/sbtc-token.clar"
+depends_on = []
+
+[contracts.bond-vault]
+path = "contracts/bond-vault.clar"
+depends_on = ["bond-nft"]
+
+[contracts.bond-marketplace]
+path = "contracts/bond-marketplace.clar"
+depends_on = ["bond-nft", "bond-vault"]
+
+[accounts.deployer]
+mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw"
+balance = 100000000000000
+
+[accounts.wallet_1]
+mnemonic = "sell invite acquire kitten bamboo drastic manuscript vivid fact assume next return crawl embrace rhetoric present festival sponsor withdraw rifle wrist culture label"
+balance = 100000000000000
+
+[accounts.wallet_2]
+mnemonic = "hold excess usual excess ring elephant install account glad dry hard dot toss amount whale delay rocket seed rice symbol uplift right about what"
+balance = 100000000000000
+
+[accounts.wallet_3]
+mnemonic = "cycle puppy glare enroll cost improve round trend wrist mushroom scorpion tower ask oppose secondary elephant knee music ponder lane use result drive"
+balance = 100000000000000
+

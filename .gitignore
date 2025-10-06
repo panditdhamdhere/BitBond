@@ -1,0 +1,29 @@
+# Node
+node_modules/
+.next/
+.DS_Store
+.env*
+yarn.lock
+npm-debug.log*
+.pnpm-store/
+
+# Logs
+logs
+*.log
+
+# Clarity / Clarinet
+.chainstate/
+.simnet/
+.settings/
+.clarinet/
+clarinet.out
+
+# Editor
+.vscode/
+.idea/
+
+# Build outputs
+out/
+dist/
+coverage/
+

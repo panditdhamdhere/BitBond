@@ -1,0 +1,46 @@
+{
+  "name": "bitbond",
+  "version": "1.0.0",
+  "description": "Bitcoin liquidity bonds protocol on Stacks blockchain",
+  "main": "index.js",
+  "scripts": {
+    "test": "clarinet test",
+    "check": "clarinet check",
+    "console": "clarinet console",
+    "integrate": "clarinet integrate --no-dashboard",
+    "frontend:dev": "cd frontend && npm run dev",
+    "frontend:build": "cd frontend && npm run build",
+    "frontend:start": "cd frontend && npm run start",
+    "frontend:test": "cd frontend && npm test",
+    "frontend:lint": "cd frontend && npm run lint",
+    "install:all": "cd frontend && npm install",
+    "clean": "rm -rf frontend/.next frontend/node_modules frontend/out",
+    "setup": "npm run install:all && clarinet check"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/bitbond.git"
+  },
+  "keywords": [
+    "bitcoin",
+    "stacks",
+    "defi",
+    "nft",
+    "liquidity",
+    "bonds",
+    "clarity",
+    "smart-contracts"
+  ],
+  "author": "BitBond Contributors",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yourusername/bitbond/issues"
+  },
+  "homepage": "https://github.com/yourusername/bitbond#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  }
+}
