@@ -8,7 +8,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       authOptions={{
         appDetails: {
           name: 'BitBond',
-          icon: '/icon.png',
+          icon: '/icon.svg',
         },
         redirectTo: '/',
         onFinish: () => {
