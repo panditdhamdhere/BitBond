@@ -82,12 +82,14 @@ export function BondCard({
     }
   }
 
+  // Gradient and badges by lock period
   const gradientForPeriod = bond.lockPeriod === 30
     ? { from: '#3b82f6', to: '#1d4ed8', badge: 'bg-blue-100 text-blue-700' }
     : bond.lockPeriod === 90
     ? { from: '#f97316', to: '#ea580c', badge: 'bg-orange-100 text-orange-700' }
     : { from: '#8b5cf6', to: '#6d28d9', badge: 'bg-purple-100 text-purple-700' }
 
+  // Progress calc using burn blocks/day
   const totalBlocks = bond.lockPeriod * BOND_CONFIG.burnBlocksPerDay
   const elapsedBlocks = Math.max(Math.min(currentBlockHeight - bond.createdAt, totalBlocks), 0)
   const progressPercent = Math.round((elapsedBlocks / totalBlocks) * 100)
@@ -253,6 +255,20 @@ export function BondCard({
           </div>
         </div>
 
+        {/* Progress */}
+        <div>
+          <div className="flex items-center justify-between text-xs text-slate-600 mb-1">
+            <span>Progress</span>
+            <span>{isMatured ? '100' : progressPercent}%</span>
+          </div>
+          <div className="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
+            <div className={`h-2 rounded-full transition-all duration-500 ${isMatured ? 'bg-green-500' : 'bg-orange-500'}`} style={{ width: `${isMatured ? 100 : progressPercent}%` }} />
+          </div>
+          {!isMatured && (
+            <div className="text-xs text-slate-600 mt-1">{timeRemaining.days}d {timeRemaining.hours}h remaining</div>
+          )}
+        </div>
+
         {/* Lock Period and Maturity */}
         <div className="grid grid-cols-2 gap-4">
           <div className="flex items-center space-x-2 text-sm">
@@ -267,20 +283,6 @@ export function BondCard({
               {isMatured ? 'Matured' : `${timeRemaining.days}d ${timeRemaining.hours}h`}
             </span>
           </div>
-        </div>
-
-        {/* Progress */}
-        <div>
-          <div className="flex items-center justify-between text-xs text-slate-600 mb-1">
-            <span>Progress</span>
-            <span>{isMatured ? '100' : progressPercent}%</span>
-          </div>
-          <div className="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
-            <div className={`h-2 rounded-full transition-all duration-500 ${isMatured ? 'bg-green-500' : 'bg-orange-500'}`} style={{ width: `${isMatured ? 100 : progressPercent}%` }} />
-          </div>
-          {!isMatured && (
-            <div className="text-xs text-slate-600 mt-1">{timeRemaining.days}d {timeRemaining.hours}h remaining</div>
-          )}
         </div>
 
         {/* Yield Information */}
