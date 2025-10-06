@@ -165,7 +165,7 @@ export function CreateBond() {
 
   if (!isConnected) {
     return (
-      <div className="bond-card p-8 text-center">
+      <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 text-center hover:shadow-xl transition-all duration-300">
         <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
           <AlertCircle className="w-8 h-8 text-white" />
         </div>
@@ -181,7 +181,7 @@ export function CreateBond() {
   }
 
   return (
-    <div className="bond-card p-8 relative overflow-hidden">
+    <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 relative overflow-hidden hover:shadow-xl transition-all duration-300">
       {/* Success Animation Overlay */}
       {showSuccess && (
         <div className="absolute inset-0 bg-green-50/95 backdrop-blur-sm flex items-center justify-center z-10 rounded-xl">

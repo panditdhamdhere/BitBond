@@ -8,12 +8,12 @@ import {
   Calendar,
   MoreVertical,
   ExternalLink,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from 'lucide-react'
 import { Bond } from '../utils/types'
 import { 
   formatSBTC, 
-  formatSTX, 
   getTimeRemaining, 
   calculateTotalPayout,
   calculateEarlyExitRefund,
@@ -28,6 +28,7 @@ interface BondCardProps {
   onEarlyExit?: (bondId: number) => void
   onList?: (bondId: number) => void
   showActions?: boolean
+  isProcessing?: boolean
 }
 
 export function BondCard({ 
@@ -36,7 +37,8 @@ export function BondCard({
   onWithdraw, 
   onEarlyExit, 
   onList,
-  showActions = true 
+  showActions = true,
+  isProcessing = false
 }: BondCardProps) {
   const [showMenu, setShowMenu] = useState(false)
   
@@ -107,9 +109,17 @@ export function BondCard({
                       onWithdraw(bond.id)
                       setShowMenu(false)
                     }}
-                    className="w-full px-4 py-2 text-left text-sm text-green-600 hover:bg-green-50"
+                    disabled={isProcessing}
+                    className="w-full px-4 py-2 text-left text-sm text-green-600 hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                   >
-                    Withdraw
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        <span>Processing...</span>
+                      </>
+                    ) : (
+                      <span>Withdraw</span>
+                    )}
                   </button>
                 )}
                 {bond.status === 'active' && !isMatured && onEarlyExit && (
@@ -118,9 +128,17 @@ export function BondCard({
                       onEarlyExit(bond.id)
                       setShowMenu(false)
                     }}
-                    className="w-full px-4 py-2 text-left text-sm text-orange-600 hover:bg-orange-50"
+                    disabled={isProcessing}
+                    className="w-full px-4 py-2 text-left text-sm text-orange-600 hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                   >
-                    Early Exit
+                    {isProcessing ? (
+                      <>
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        <span>Processing...</span>
+                      </>
+                    ) : (
+                      <span>Early Exit</span>
+                    )}
                   </button>
                 )}
                 {bond.status === 'active' && onList && (
