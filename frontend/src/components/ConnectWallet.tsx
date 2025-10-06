@@ -19,7 +19,7 @@ import { formatSBTC, formatSTX } from '../utils/bondCalculations'
 import toast from 'react-hot-toast'
 
 export default function ConnectWallet() {
-  const { isConnected, address, network } = useConnect()
+  const { isConnected, address, network, doOpenAuth } = useConnect() as any
   const { 
     balance, 
     isLoading, 
@@ -49,8 +49,8 @@ export default function ConnectWallet() {
 
   const handleConnect = async () => {
     try {
-      // The connection is handled by the Connect provider
-      // This component just manages the UI state
+      // Trigger Stacks Connect auth popup
+      await doOpenAuth?.()
       toast.success('Wallet connection initiated')
     } catch (err) {
       toast.error('Failed to connect wallet')

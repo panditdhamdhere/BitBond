@@ -1,0 +1,13 @@
+{
+  "name": "BitBond",
+  "short_name": "BitBond",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f7931a",
+  "icons": [
+    { "src": "/favicon.ico", "sizes": "48x48 72x72 96x96 144x144 192x192", "type": "image/x-icon" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
+
