@@ -4,7 +4,8 @@ import { useMemo, useState } from 'react'
 import { Grid, List, RefreshCw, TrendingUp } from 'lucide-react'
 import { useMarketplace } from '../hooks/useMarketplace'
 import { BondListing } from '../utils/types'
-import { formatSBTC, formatSTX, getTimeRemaining, calculateTotalPayout } from '../utils/bondCalculations'
+import { formatSBTC, formatSTX, calculateTotalPayout } from '../utils/bondCalculations'
+import { BOND_CONFIG } from '../utils/constants'
 import BuyBondModal from './BuyBondModal'
 import toast from 'react-hot-toast'
 
@@ -22,8 +23,7 @@ export default function BondMarketplace() {
   const enriched = useMemo(() => {
     return listings.map((l) => {
       const daysTotal = l.bond.lockPeriod
-      const time = getTimeRemaining(l.bond, l.currentBlockHeight || 0)
-      const daysElapsed = Math.max(daysTotal - time.days - (time.hours > 0 ? 1 : 0), 0)
+      const daysElapsed = 0 // Without chain time, default to 0 elapsed
       const intrinsic = l.bond.amount + Math.floor(l.bond.amount * (l.bond.apy / 100) * (daysElapsed / daysTotal))
       const discount = intrinsic > 0 ? ((intrinsic - l.price) / intrinsic) * 100 : 0
       return { ...l, intrinsic, discount }
@@ -41,7 +41,8 @@ export default function BondMarketplace() {
       })
       .filter(l => {
         if (filterMaturity === 'all') return true
-        const { days } = getTimeRemaining(l.bond, l.currentBlockHeight || 0)
+        const totalBlocks = l.bond.maturityDate - l.bond.createdAt
+        const days = Math.max(Math.floor(totalBlocks / BOND_CONFIG.burnBlocksPerDay), 0)
         if (filterMaturity === 'lt7') return days < 7
         if (filterMaturity === 'lt30') return days < 30
         return days >= 30
@@ -89,7 +90,7 @@ export default function BondMarketplace() {
 
   if (loading.isLoading && listings.length === 0) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-12" aria-busy="true" aria-live="polite">
         <div className="flex items-center space-x-3">
           <RefreshCw className="w-6 h-6 animate-spin text-orange-500" />
           <span className="text-slate-600">Loading marketplace...</span>
@@ -198,15 +199,16 @@ export default function BondMarketplace() {
 
       {/* Listings */}
       {sorted.length === 0 ? (
-        <div className="text-center py-12">
+        <div className="text-center py-12" role="status">
           <TrendingUp className="w-12 h-12 text-slate-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-slate-900 mb-2">No bonds found</h3>
           <p className="text-slate-600">No bonds match your filters. Try adjusting them.</p>
         </div>
       ) : (
-        <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
+        <div role={viewMode === 'grid' ? 'grid' : 'list'} className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
           {sorted.map((l) => {
-            const time = getTimeRemaining(l.bond, l.currentBlockHeight || 0)
+            const totalDays = Math.max(Math.floor((l.bond.maturityDate - l.bond.createdAt) / BOND_CONFIG.burnBlocksPerDay), 0)
+            const time = { days: totalDays, hours: 0 }
             const goodDeal = l.discount > 10
             return (
               <div key={l.id} className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-all duration-300 relative">
