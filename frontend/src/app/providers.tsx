@@ -1,25 +1,11 @@
 'use client'
 
-import { Connect } from '@stacks/connect-react'
+import { AuthProvider } from '../contexts/AuthContext'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <Connect
-      authOptions={{
-        appDetails: {
-          name: 'BitBond',
-          icon: '/icon.svg',
-        },
-        redirectTo: '/',
-        onFinish: () => {
-          console.log('Wallet connected successfully')
-        },
-        onCancel: () => {
-          console.log('Connection cancelled')
-        },
-      }}
-    >
+    <AuthProvider>
       {children}
-    </Connect>
+    </AuthProvider>
   )
 }

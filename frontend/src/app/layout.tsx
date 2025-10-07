@@ -29,7 +29,14 @@ export default function RootLayout({
           <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
             {children}
           </div>
-          <Toaster position="top-right" />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 3000,
+              success: { duration: 3000 },
+              error: { duration: 4000 },
+            }}
+          />
         </Providers>
       </body>
     </html>

@@ -1,20 +1,20 @@
 'use client'
 
-import { Suspense, lazy, useEffect, useState } from 'react'
-import ConnectWallet from '@/components/ConnectWallet'
-const Dashboard = lazy(() => import('@/components/Dashboard').then(m => ({ default: m.Dashboard })))
-const Marketplace = lazy(() => import('@/components/Marketplace').then(m => ({ default: m.Marketplace })))
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import dynamic from 'next/dynamic'
+const ConnectWallet = dynamic(() => import('@/components/ConnectWallet'), { ssr: false })
 import { 
   TrendingUp, 
   Shield, 
   BarChart3, 
   ShoppingCart,
   Wallet,
-  Bitcoin
+  Bitcoin,
+  ArrowRight
 } from 'lucide-react'
 
 export default function HomePage() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'marketplace'>('dashboard')
   const [mounted, setMounted] = useState(false)
   // Mock protocol stats; in production, fetch from analytics/stacksClient
   const [tvlBtc, setTvlBtc] = useState(152.34)
@@ -28,18 +28,13 @@ export default function HomePage() {
     return () => cancelAnimationFrame(id)
   }, [])
 
-  const tabs = [
-    { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-    { id: 'marketplace', label: 'Marketplace', icon: ShoppingCart },
-  ]
-
   return (
     <div className="min-h-screen">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
+            <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
               <div className="w-8 h-8 bg-bitcoin-gradient rounded-lg flex items-center justify-center">
                 <TrendingUp className="w-5 h-5 text-white" />
               </div>
@@ -49,7 +44,23 @@ export default function HomePage() {
                 </h1>
                 <p className="text-xs text-slate-500">Liquid Bonds for Bitcoin</p>
               </div>
-            </div>
+            </Link>
+            
+            <nav className="hidden md:flex items-center space-x-6">
+              <Link href="/" className="text-orange-600 font-semibold border-b-2 border-orange-600">
+                Home
+              </Link>
+              <Link href="/dashboard" className="text-slate-600 hover:text-slate-900 transition-colors font-medium">
+                Dashboard
+              </Link>
+              <Link href="/marketplace" className="text-slate-600 hover:text-slate-900 transition-colors font-medium">
+                Marketplace
+              </Link>
+              <Link href="/analytics" className="text-slate-600 hover:text-slate-900 transition-colors font-medium">
+                Analytics
+              </Link>
+            </nav>
+            
             <ConnectWallet />
           </div>
         </div>
@@ -127,52 +138,61 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Main Content */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Tab Navigation */}
-          <div className="flex space-x-1 bg-slate-100 p-1 rounded-lg mb-8 max-w-md mx-auto" role="tablist" aria-label="Primary navigation">
-            {tabs.map((tab) => {
-              const Icon = tab.icon
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as 'dashboard' | 'marketplace')}
-                  role="tab"
-                  aria-selected={activeTab === tab.id}
-                  aria-controls={`panel-${tab.id}`}
-                  className={`flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
-                    activeTab === tab.id
-                      ? 'bg-white shadow-sm text-slate-900'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                  style={{ minHeight: 44 }}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span className="font-medium">{tab.label}</span>
-                </button>
-              )
-            })}
-          </div>
+      {/* Call to Action Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-4xl mx-auto text-center">
+          <h3 className="text-3xl font-bold text-slate-900 mb-4">
+            Ready to Start Earning?
+          </h3>
+          <p className="text-lg text-slate-600 mb-10">
+            Connect your wallet and create your first bond in minutes
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Link
+              href="/dashboard"
+              className="group flex flex-col items-center p-8 bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-2 border-orange-200 hover:border-orange-400"
+            >
+              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <BarChart3 className="w-8 h-8 text-white" />
+              </div>
+              <h4 className="text-xl font-bold text-slate-900 mb-2">My Dashboard</h4>
+              <p className="text-slate-600 text-sm mb-4">View and manage your bonds</p>
+              <div className="flex items-center text-orange-600 font-medium group-hover:gap-2 transition-all">
+                <span>Go to Dashboard</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
 
-          {/* Tab Content */}
-          <div className="min-h-[600px]">
-            <Suspense fallback={<div className="grid gap-6 animate-pulse" aria-busy="true" aria-live="polite">
-              <div className="h-40 bg-slate-200 rounded-xl" />
-              <div className="h-40 bg-slate-200 rounded-xl" />
-              <div className="h-40 bg-slate-200 rounded-xl" />
-            </div>}>
-              {activeTab === 'dashboard' && (
-                <div id="panel-dashboard" role="tabpanel" aria-labelledby="dashboard">
-                  <Dashboard />
-                </div>
-              )}
-              {activeTab === 'marketplace' && (
-                <div id="panel-marketplace" role="tabpanel" aria-labelledby="marketplace">
-                  <Marketplace />
-                </div>
-              )}
-            </Suspense>
+            <Link
+              href="/marketplace"
+              className="group flex flex-col items-center p-8 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-2 border-blue-200 hover:border-blue-400"
+            >
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <ShoppingCart className="w-8 h-8 text-white" />
+              </div>
+              <h4 className="text-xl font-bold text-slate-900 mb-2">Marketplace</h4>
+              <p className="text-slate-600 text-sm mb-4">Buy and sell bond NFTs</p>
+              <div className="flex items-center text-blue-600 font-medium group-hover:gap-2 transition-all">
+                <span>Browse Bonds</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
+
+            <Link
+              href="/analytics"
+              className="group flex flex-col items-center p-8 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-2xl hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-2 border-emerald-200 hover:border-emerald-400"
+            >
+              <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <TrendingUp className="w-8 h-8 text-white" />
+              </div>
+              <h4 className="text-xl font-bold text-slate-900 mb-2">Analytics</h4>
+              <p className="text-slate-600 text-sm mb-4">View protocol statistics</p>
+              <div className="flex items-center text-emerald-600 font-medium group-hover:gap-2 transition-all">
+                <span>See Analytics</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
           </div>
         </div>
       </section>
