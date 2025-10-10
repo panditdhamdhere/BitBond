@@ -5,6 +5,7 @@ import { RefreshCw, Download } from 'lucide-react'
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, Legend } from 'recharts'
 import { stacksClient } from '../utils/stacksClient'
 import { truncateAddress } from '../utils/stacksClient'
+import { DEMO_RECENT_ACTIVITY, DEMO_LEADERBOARD } from '../utils/demoData'
 
 type TimeRange = '24h' | '7d' | '30d' | 'all'
 
@@ -95,16 +96,36 @@ export default function Analytics() {
     setLoading(true)
     setError(null)
     try {
-      // Replace with real stats call; currently mocked
-      const s = await stacksClient.getMarketplaceStats()
+      // Use demo data for showcase
+      const protocolStats = await stacksClient.getProtocolStats()
       setStats({
-        tvlBtc: 150.25,
-        totalBonds: 245,
-        totalYieldBtc: 3.42,
-        insuranceBtc: 1.12,
-        avgApy: 8.4,
-        marketVolumeStx: s ? s.totalVolume : 0,
+        tvlBtc: protocolStats ? protocolStats.totalValueLocked / 100000000 : 0.15,
+        totalBonds: protocolStats ? protocolStats.totalBonds : 1250,
+        totalYieldBtc: protocolStats ? protocolStats.totalYield / 100000000 : 0.025,
+        insuranceBtc: protocolStats ? protocolStats.insurancePool / 100000000 : 0.005,
+        avgApy: protocolStats ? protocolStats.averageApy : 8.5,
+        marketVolumeStx: protocolStats ? protocolStats.marketplaceVolume / 1000000 : 5.0,
       })
+      
+      // Use demo activity and leaderboard data
+      setActivity(DEMO_RECENT_ACTIVITY.map(item => ({
+        id: item.id.toString(),
+        type: item.type as 'create' | 'withdraw' | 'sale',
+        address: item.user,
+        amount: item.amount,
+        timestamp: item.timestamp.getTime()
+      })))
+      
+      setHolders(DEMO_LEADERBOARD.map(item => ({
+        address: item.address,
+        amount: item.amount / 100000000 // Convert to BTC
+      })))
+      
+      setTraders(DEMO_LEADERBOARD.map(item => ({
+        address: item.address,
+        amount: item.amount / 1000000 // Convert to STX equivalent
+      })))
+      
       generateData(range === '24h' ? 1 : range === '7d' ? 7 : range === '30d' ? 30 : 60)
     } catch (e) {
       setError('Failed to load analytics')

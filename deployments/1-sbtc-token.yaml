@@ -1,0 +1,19 @@
+---
+id: 6
+name: Deploy sBTC Token v2
+network: testnet
+stacks-node: "https://api.testnet.hiro.so"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoind.testnet.stacks.co:18332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - contract-publish:
+            contract-name: sbtc-token
+            expected-sender: ST12K3B03KFQNFSXSBWEBZG2CE0R75M4GRRJ73S72
+            cost: 100000
+            path: contracts/sbtc-token.clar
+            anchor-block-only: true
+            clarity-version: 1
+      epoch: "2.05"
+

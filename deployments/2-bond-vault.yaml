@@ -1,0 +1,19 @@
+---
+id: 7
+name: Deploy Bond Vault
+network: testnet
+stacks-node: "https://api.testnet.hiro.so"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoind.testnet.stacks.co:18332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - contract-publish:
+            contract-name: bond-vault
+            expected-sender: ST12K3B03KFQNFSXSBWEBZG2CE0R75M4GRRJ73S72
+            cost: 100000
+            path: contracts/bond-vault.clar
+            anchor-block-only: true
+            clarity-version: 1
+      epoch: "2.05"
+

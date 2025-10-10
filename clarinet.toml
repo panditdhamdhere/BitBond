@@ -12,6 +12,10 @@ parser_version = 2
 path = "contracts/sbtc-token.clar"
 depends_on = []
 
+[contracts.bond-nft]
+path = "contracts/bond-nft.clar"
+depends_on = []
+
 [contracts.bond-vault]
 path = "contracts/bond-vault.clar"
 depends_on = ["bond-nft"]
@@ -21,7 +25,7 @@ path = "contracts/bond-marketplace.clar"
 depends_on = ["bond-nft", "bond-vault"]
 
 [accounts.deployer]
-mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw"
+mnemonic = "paper venue rotate loud blade gossip chunk peanut universe duck picture found jeans wall defense ridge net genuine seat fantasy assume dawn team chronic"
 balance = 100000000000000
 
 [accounts.wallet_1]

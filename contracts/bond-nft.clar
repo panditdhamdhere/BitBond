@@ -189,4 +189,3 @@
 (define-read-only (is-approved-operator (who principal))
   (ok (is-eq who (var-get marketplace))))
 
-

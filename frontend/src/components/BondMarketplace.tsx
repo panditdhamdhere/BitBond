@@ -8,6 +8,7 @@ import { formatSBTC, formatSTX, calculateTotalPayout } from '../utils/bondCalcul
 import { BOND_CONFIG } from '../utils/constants'
 import BuyBondModal from './BuyBondModal'
 import toast from 'react-hot-toast'
+import { stacksClient } from '../utils/stacksClient'
 
 export default function BondMarketplace() {
   const { listings, loading, hasMore, loadMore, refreshListings } = useMarketplace()

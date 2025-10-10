@@ -1,6 +1,8 @@
 [network]
 name = "testnet"
-stacks_node_rpc_address = "https://stacks-node-api.stacks-testnet.com"
-stacks_node_p2p_address = "https://stacks-node-api.stacks-testnet.com"
-stacks_node_event_source_address = "https://stacks-node-api.stacks-testnet.com"
-chain_id = 2147483648
+stacks_node_rpc_address = "https://api.testnet.hiro.so"
+deployment_fee_rate = 10
+
+[accounts.deployer]
+mnemonic = "paper venue rotate loud blade gossip chunk peanut universe duck picture found jeans wall defense ridge net genuine seat fantasy assume dawn team chronic"
+balance = 10000000

@@ -16,6 +16,7 @@ import { CreateBond } from './CreateBond'
 import { useAuth } from '../hooks/useAuth'
 import { useBonds } from '../hooks/useBonds'
 import { formatSBTC } from '../utils/bondCalculations'
+import { stacksClient } from '../utils/stacksClient'
 
 export function Dashboard() {
   const { address } = useAuth()

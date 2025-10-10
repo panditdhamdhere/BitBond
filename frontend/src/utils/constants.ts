@@ -1,24 +1,33 @@
 import { ContractConfig, LockPeriod } from './types'
 
-// Contract addresses (update these with actual deployed addresses)
+const ENV = {
+  network: (process.env.NEXT_PUBLIC_NETWORK || 'testnet') as 'mainnet' | 'testnet' | 'devnet',
+  bondVault: process.env.NEXT_PUBLIC_BOND_VAULT_CONTRACT,
+  bondNft: process.env.NEXT_PUBLIC_BOND_NFT_CONTRACT,
+  bondMarketplace: process.env.NEXT_PUBLIC_BOND_MARKETPLACE_CONTRACT,
+  sbtcToken: process.env.NEXT_PUBLIC_SBTC_CONTRACT,
+  apiUrl: process.env.NEXT_PUBLIC_STACKS_API || 'https://api.testnet.hiro.so',
+}
+
+// Contract addresses from environment variables
 export const CONTRACTS: Record<string, ContractConfig> = {
   mainnet: {
-    bondVault: 'SP1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-vault',
-    bondNft: 'SP1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-nft',
-    bondMarketplace: 'SP1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-marketplace',
-    sbtcToken: 'SP1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-token',
+    bondVault: ENV.bondVault || 'SP1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-vault',
+    bondNft: ENV.bondNft || 'SP1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-nft',
+    bondMarketplace: ENV.bondMarketplace || 'SP1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-marketplace',
+    sbtcToken: ENV.sbtcToken || 'SP1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-token',
   },
   testnet: {
-    bondVault: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-vault',
-    bondNft: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-nft',
-    bondMarketplace: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-marketplace',
-    sbtcToken: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-token',
+    bondVault: ENV.bondVault || 'ST12K3B03KFQNFSXSBWEBZG2CE0R75M4GRRJ73S72.bond-vault',
+    bondNft: ENV.bondNft || 'ST12K3B03KFQNFSXSBWEBZG2CE0R75M4GRRJ73S72.bond-nft',
+    bondMarketplace: ENV.bondMarketplace || 'ST12K3B03KFQNFSXSBWEBZG2CE0R75M4GRRJ73S72.bond-marketplace',
+    sbtcToken: ENV.sbtcToken || 'ST12K3B03KFQNFSXSBWEBZG2CE0R75M4GRRJ73S72.sbtc-token',
   },
   devnet: {
-    bondVault: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-vault',
-    bondNft: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-nft',
-    bondMarketplace: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-marketplace',
-    sbtcToken: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-token',
+    bondVault: ENV.bondVault || 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-vault',
+    bondNft: ENV.bondNft || 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-nft',
+    bondMarketplace: ENV.bondMarketplace || 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.bond-marketplace',
+    sbtcToken: ENV.sbtcToken || 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM.sbtc-token',
   },
 }
 
@@ -40,12 +49,12 @@ export const BOND_CONFIG = {
 // Network configuration
 export const NETWORK_CONFIG = {
   mainnet: {
-    coreApiUrl: 'https://stacks-node-api.stacks.co',
+    coreApiUrl: ENV.apiUrl,
     network: 'mainnet' as const,
     chainId: 1,
   },
   testnet: {
-    coreApiUrl: 'https://stacks-node-api.stacks-testnet.com',
+    coreApiUrl: ENV.apiUrl,
     network: 'testnet' as const,
     chainId: 2147483648,
   },
@@ -88,7 +97,7 @@ export const SUCCESS_MESSAGES = {
 
 // Default values
 export const DEFAULTS = {
-  network: 'testnet' as const,
+  network: ENV.network,
   lockPeriod: 30 as LockPeriod,
   amount: 10000, // 0.01 sBTC in micro-sats
   price: 10000, // 0.01 STX in micro-STX
