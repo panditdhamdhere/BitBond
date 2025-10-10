@@ -8,6 +8,8 @@ export interface Bond {
   apy: number // percentage
   status: BondStatus
   yield?: number // calculated yield amount
+  // optional dynamic fields used in UI
+  currentValue?: number
 }
 
 export interface BondListing {
@@ -40,7 +42,7 @@ export interface ContractConfig {
   sbtcToken: string
 }
 
-export type BondStatus = 'active' | 'withdrawn' | 'early-exit'
+export type BondStatus = 'active' | 'withdrawn' | 'early-exit' | 'matured'
 export type LockPeriod = 30 | 90 | 180
 export type Network = 'mainnet' | 'testnet' | 'devnet'
 

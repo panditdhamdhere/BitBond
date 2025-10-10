@@ -1,6 +1,5 @@
-import { uintCV, principalCV, cvToJSON, callReadOnlyFunction, ClarityValue } from '@stacks/transactions'
+import { uintCV, cvToJSON, fetchCallReadOnlyFunction, ClarityValue } from '@stacks/transactions'
 import { openContractCall, showConnect } from '@stacks/connect'
-import { StacksTestnet, StacksMainnet } from '@stacks/network'
 import { 
   Bond, 
   BondListing, 
@@ -11,6 +10,7 @@ import {
   Network
 } from './types'
 import { CONTRACTS, NETWORK_CONFIG } from './constants'
+import type { ContractConfig } from './types'
 import { DEMO_BONDS, DEMO_LISTINGS, DEMO_PROTOCOL_STATS } from './demoData'
 
 type NetworkConfig = {
@@ -21,7 +21,7 @@ type NetworkConfig = {
 
 class StacksClient {
   private network: NetworkConfig
-  private contracts: Record<string, string>
+  private contracts: ContractConfig
   private demoMode: boolean
 
   constructor(network: Network = 'testnet') {
@@ -57,7 +57,8 @@ class StacksClient {
    * Get Stacks network object for transactions
    */
   private getStacksNetwork() {
-    return this.network.name === 'testnet' ? new StacksTestnet() : new StacksMainnet()
+    // Minimal network object for read-only calls
+    return { url: this.network.url } as unknown as any
   }
 
   /**
@@ -78,8 +79,8 @@ class StacksClient {
           // No-op
         },
       })
-      
-      return { success: true, address: result.address }
+      // Using global auth flow; address is handled elsewhere
+      return { success: true }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Wallet connection failed'
       return { success: false, error: message }
@@ -290,7 +291,7 @@ class StacksClient {
       const [contractAddress, contractName] = this.contracts.bondVault.split('.')
       const network = this.getStacksNetwork()
       
-      const result = await callReadOnlyFunction({
+      const result = await fetchCallReadOnlyFunction({
         contractAddress,
         contractName,
         functionName: 'get-bond',
@@ -329,12 +330,38 @@ class StacksClient {
   async getListing(bondId: number): Promise<BondListing | null> {
     if (this.demoMode) {
       await new Promise(resolve => setTimeout(resolve, 500))
-      return DEMO_LISTINGS.find(listing => listing.bondId === bondId) || null
+      return DEMO_LISTINGS.find(listing => listing.bond.id === bondId) || null
     }
     
     try {
-      // Placeholder: Replace with real read-only call
-      return null
+      const [marketAddress, marketName] = this.contracts.bondMarketplace.split('.')
+      const network = this.getStacksNetwork()
+      const res = await fetchCallReadOnlyFunction({
+        contractAddress: marketAddress,
+        contractName: marketName,
+        functionName: 'get-listing',
+        functionArgs: [uintCV(bondId)],
+        network,
+        senderAddress: marketAddress,
+      })
+
+      const json = cvToJSON(res)
+      if (!json.success) return null
+
+      const opt = json.value
+      const listingVal = opt && (opt.some || opt.value || null)
+      if (!listingVal) return null
+
+      const bond = await this.getBondInfo(Number(listingVal['bond-id']))
+      if (!bond) return null
+
+      return {
+        id: Number(bondId),
+        seller: listingVal.seller,
+        price: Number(listingVal.price),
+        listedAt: Number(listingVal['created-at']),
+        bond,
+      }
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Get listing failed:', error)
@@ -396,8 +423,51 @@ class StacksClient {
     }
     
     try {
-      // Real contract call would go here
-      return []
+      const [marketAddress, marketName] = this.contracts.bondMarketplace.split('.')
+      const network = this.getStacksNetwork()
+
+      // get total listings from stats
+      const statsRes = await fetchCallReadOnlyFunction({
+        contractAddress: marketAddress,
+        contractName: marketName,
+        functionName: 'get-marketplace-stats',
+        functionArgs: [],
+        network,
+        senderAddress: marketAddress,
+      })
+      const statsJson = cvToJSON(statsRes)
+      const totalListings = Number((statsJson.value && statsJson.value['total-listings']) || 0)
+
+      const listings: BondListing[] = []
+      for (let i = 1; i <= totalListings; i++) {
+        const res = await fetchCallReadOnlyFunction({
+          contractAddress: marketAddress,
+          contractName: marketName,
+          functionName: 'get-listing',
+          functionArgs: [uintCV(i)],
+          network,
+          senderAddress: marketAddress,
+        })
+        const json = cvToJSON(res)
+        if (!json.success) continue
+        const val = json.value && (json.value.some || json.value.value)
+        if (!val) continue
+        // keep only active
+        const statusStr = String(val.status || '')
+        if (statusStr.toLowerCase() !== 'active') continue
+
+        const bond = await this.getBondInfo(Number(val['bond-id']))
+        if (!bond) continue
+        listings.push({
+          id: i,
+          seller: val.seller,
+          price: Number(val.price),
+          listedAt: Number(val['created-at']),
+          bond,
+        })
+      }
+
+      return listings
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Get all listings failed:', error)
@@ -415,8 +485,48 @@ class StacksClient {
     }
     
     try {
-      // Placeholder: Replace with real read-only call
-      return []
+      const [vaultAddress, vaultName] = this.contracts.bondVault.split('.')
+      const network = this.getStacksNetwork()
+
+      // get next id (1-based). We'll iterate 1..nextId-1
+      const nextIdRes = await fetchCallReadOnlyFunction({
+        contractAddress: vaultAddress,
+        contractName: vaultName,
+        functionName: 'get-next-bond-id',
+        functionArgs: [],
+        network,
+        senderAddress: vaultAddress,
+      })
+      const nextJson = cvToJSON(nextIdRes)
+      const nextId = Number(nextJson.value || 1)
+
+      const bonds: Bond[] = []
+      for (let i = 1; i < nextId; i++) {
+        const res = await fetchCallReadOnlyFunction({
+          contractAddress: vaultAddress,
+          contractName: vaultName,
+          functionName: 'get-bond',
+          functionArgs: [uintCV(i)],
+          network,
+          senderAddress: vaultAddress,
+        })
+        const json = cvToJSON(res)
+        if (!json.success || !json.value) continue
+        const b = json.value
+        if (!b || String(b.owner) !== address) continue
+        bonds.push({
+          id: i,
+          owner: b.owner,
+          amount: Number(b.amount),
+          lockPeriod: Number(b['lock-period']),
+          createdAt: Number(b['created-at']),
+          maturityDate: Number(b['created-at']) + Number(b['lock-period']),
+          apy: Number(b.apy) / 100,
+          status: b.status as 'active' | 'withdrawn' | 'early-exit',
+          currentValue: Number(b.amount),
+        } as unknown as Bond)
+      }
+      return bonds
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Get user bonds failed:', error)
@@ -441,7 +551,7 @@ class StacksClient {
       const network = this.getStacksNetwork()
       
       // Get vault stats
-      const vaultStats = await callReadOnlyFunction({
+      const vaultStats = await fetchCallReadOnlyFunction({
         contractAddress: vaultAddress,
         contractName: vaultName,
         functionName: 'get-protocol-stats',
@@ -451,7 +561,7 @@ class StacksClient {
       })
       
       // Get marketplace stats
-      const marketStats = await callReadOnlyFunction({
+      const marketStats = await fetchCallReadOnlyFunction({
         contractAddress: marketAddress,
         contractName: marketName,
         functionName: 'get-marketplace-stats',
