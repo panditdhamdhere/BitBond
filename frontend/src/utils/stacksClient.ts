@@ -280,13 +280,6 @@ class StacksClient {
    * Read bond information
    */
   async getBondInfo(bondId: number): Promise<Bond | null> {
-    const contractsAvailable = await this.checkContractsAvailable()
-    
-    if (this.demoMode || !contractsAvailable) {
-      await new Promise(resolve => setTimeout(resolve, 500))
-      return DEMO_BONDS.find(bond => bond.id === bondId) || null
-    }
-    
     try {
       const [contractAddress, contractName] = this.contracts.bondVault.split('.')
       const network = this.getStacksNetwork()
@@ -320,6 +313,10 @@ class StacksClient {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Get bond info failed:', error)
+      // Fallback to demo data if contracts fail
+      if (this.demoMode) {
+        return DEMO_BONDS.find(bond => bond.id === bondId) || null
+      }
       return null
     }
   }
@@ -328,11 +325,6 @@ class StacksClient {
    * Get marketplace listing
    */
   async getListing(bondId: number): Promise<BondListing | null> {
-    if (this.demoMode) {
-      await new Promise(resolve => setTimeout(resolve, 500))
-      return DEMO_LISTINGS.find(listing => listing.bond.id === bondId) || null
-    }
-    
     try {
       const [marketAddress, marketName] = this.contracts.bondMarketplace.split('.')
       const network = this.getStacksNetwork()
@@ -373,23 +365,31 @@ class StacksClient {
    * Get marketplace statistics
    */
   async getMarketplaceStats(): Promise<{ totalVolume: number; totalFees: number; totalListings: number; activeBonds: number } | null> {
-    if (this.demoMode) {
-      await new Promise(resolve => setTimeout(resolve, 500))
-      return {
-        totalVolume: DEMO_PROTOCOL_STATS.marketplaceVolume,
-        totalFees: DEMO_PROTOCOL_STATS.marketplaceVolume * 0.02, // 2% fee
-        totalListings: DEMO_PROTOCOL_STATS.listedBonds,
-        activeBonds: DEMO_PROTOCOL_STATS.activeBonds
-      }
-    }
-    
     try {
-      return {
-        totalVolume: 1000000,
-        totalFees: 20000,
-        totalListings: 5,
-        activeBonds: 10
+      const [marketAddress, marketName] = this.contracts.bondMarketplace.split('.')
+      const network = this.getStacksNetwork()
+      
+      const marketStats = await fetchCallReadOnlyFunction({
+        contractAddress: marketAddress,
+        contractName: marketName,
+        functionName: 'get-marketplace-stats',
+        functionArgs: [],
+        network,
+        senderAddress: marketAddress,
+      })
+      
+      const json = cvToJSON(marketStats)
+      if (json.success && json.value) {
+        const stats = json.value
+        return {
+          totalVolume: Number(stats['total-volume']) || 0,
+          totalFees: Number(stats['total-fees']) || 0,
+          totalListings: Number(stats['total-listings']) || 0,
+          activeBonds: Number(stats['active-listings']) || 0
+        }
       }
+      
+      return null
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Get marketplace stats failed:', error)
@@ -415,13 +415,6 @@ class StacksClient {
    * Get all marketplace listings
    */
   async getAllListings(): Promise<BondListing[]> {
-    const contractsAvailable = await this.checkContractsAvailable()
-    
-    if (this.demoMode || !contractsAvailable) {
-      await new Promise(resolve => setTimeout(resolve, 500))
-      return DEMO_LISTINGS
-    }
-    
     try {
       const [marketAddress, marketName] = this.contracts.bondMarketplace.split('.')
       const network = this.getStacksNetwork()
@@ -471,6 +464,10 @@ class StacksClient {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Get all listings failed:', error)
+      // Fallback to demo data if contracts fail
+      if (this.demoMode) {
+        return DEMO_LISTINGS
+      }
       return []
     }
   }
@@ -479,11 +476,6 @@ class StacksClient {
    * Get all user bonds
    */
   async getUserBonds(address: string): Promise<Bond[]> {
-    if (this.demoMode) {
-      await new Promise(resolve => setTimeout(resolve, 500))
-      return DEMO_BONDS.filter(bond => bond.owner === address)
-    }
-    
     try {
       const [vaultAddress, vaultName] = this.contracts.bondVault.split('.')
       const network = this.getStacksNetwork()
@@ -530,6 +522,10 @@ class StacksClient {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Get user bonds failed:', error)
+      // Fallback to demo data if contracts fail
+      if (this.demoMode) {
+        return DEMO_BONDS.filter(bond => bond.owner === address)
+      }
       return []
     }
   }
@@ -538,13 +534,6 @@ class StacksClient {
    * Get protocol statistics
    */
   async getProtocolStats(): Promise<typeof DEMO_PROTOCOL_STATS | null> {
-    const contractsAvailable = await this.checkContractsAvailable()
-    
-    if (this.demoMode || !contractsAvailable) {
-      await new Promise(resolve => setTimeout(resolve, 500))
-      return DEMO_PROTOCOL_STATS
-    }
-    
     try {
       const [vaultAddress, vaultName] = this.contracts.bondVault.split('.')
       const [marketAddress, marketName] = this.contracts.bondMarketplace.split('.')
@@ -603,15 +592,19 @@ class StacksClient {
         return stats
       }
       
-      // eslint-disable-next-line no-console
-      console.log('Contract calls failed, falling back to demo data')
-      return DEMO_PROTOCOL_STATS
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Get protocol stats failed:', error)
-      return DEMO_PROTOCOL_STATS
+        // eslint-disable-next-line no-console
+        console.log('Contract calls returned no data')
+        return null
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Get protocol stats failed:', error)
+        // Fallback to demo data if contracts fail
+        if (this.demoMode) {
+          return DEMO_PROTOCOL_STATS
+        }
+        return null
+      }
     }
-  }
 }
 
 export const stacksClient = new StacksClient()
