@@ -179,7 +179,7 @@ export default function TestContractsPage() {
                       View Response Data
                     </summary>
                     <pre className="mt-2 text-xs bg-slate-100 rounded p-3 overflow-x-auto">
-                      {JSON.stringify(test.data, null, 2)}
+                      {JSON.stringify(test.data as any, null, 2)}
                     </pre>
                   </details>
                 )}

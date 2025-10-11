@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 const ConnectWallet = dynamic(() => import('@/components/ConnectWallet'), { ssr: false })
+import { stacksClient } from '@/utils/stacksClient'
 import { 
   TrendingUp, 
   Shield, 
@@ -16,17 +17,51 @@ import {
 
 export default function HomePage() {
   const [mounted, setMounted] = useState(false)
-  // Mock protocol stats; in production, fetch from analytics/stacksClient
-  const [tvlBtc, setTvlBtc] = useState(152.34)
-  const [btcUsd, setBtcUsd] = useState(65000) // mock price
-  const [bondsCreated, setBondsCreated] = useState(245)
-  const [activeBonds, setActiveBonds] = useState(172)
-  const [avgApy, setAvgApy] = useState(8.4)
+  // Real protocol stats from smart contracts
+  const [tvlBtc, setTvlBtc] = useState(0)
+  const [btcUsd, setBtcUsd] = useState(65000) // BTC price
+  const [bondsCreated, setBondsCreated] = useState(0)
+  const [activeBonds, setActiveBonds] = useState(0)
+  const [avgApy, setAvgApy] = useState(0)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const id = requestAnimationFrame(() => setMounted(true))
     return () => cancelAnimationFrame(id)
   }, [])
+
+  // Fetch real protocol stats from smart contracts
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true)
+        const protocolStats = await stacksClient.getProtocolStats()
+        
+        if (protocolStats) {
+          // Convert from satoshis to BTC (divide by 100,000,000)
+          setTvlBtc(protocolStats.totalValueLocked / 100000000)
+          setBondsCreated(protocolStats.totalBondsCreated)
+          setActiveBonds(protocolStats.activeBonds)
+          setAvgApy(protocolStats.averageAPY)
+        } else {
+          // If no data, show zeros (empty state)
+          setTvlBtc(0)
+          setBondsCreated(0)
+          setActiveBonds(0)
+          setAvgApy(0)
+        }
+      } catch (error) {
+        console.error('Failed to fetch protocol stats:', error)
+        // Keep zeros on error
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (mounted) {
+      fetchStats()
+    }
+  }, [mounted])
 
   return (
     <div className="min-h-screen">
@@ -129,11 +164,12 @@ export default function HomePage() {
               valuePrefix=""
               value={tvlBtc}
               suffix=" BTC"
-              sub={`$${(tvlBtc * btcUsd).toLocaleString(undefined, { maximumFractionDigits: 0 })} USD`}
+              sub={loading ? "Loading..." : `$${(tvlBtc * btcUsd).toLocaleString(undefined, { maximumFractionDigits: 0 })} USD`}
+              loading={loading}
             />
-            <Stat label="Total Bonds" value={bondsCreated} integer />
-            <Stat label="Active Bonds" value={activeBonds} integer />
-            <Stat label="Average APY" value={avgApy} suffix="%" />
+            <Stat label="Total Bonds" value={bondsCreated} integer loading={loading} />
+            <Stat label="Active Bonds" value={activeBonds} integer loading={loading} />
+            <Stat label="Average APY" value={avgApy} suffix="%" loading={loading} />
           </div>
         </div>
       </section>
@@ -209,10 +245,12 @@ export default function HomePage() {
   )
 }
 
-function Stat({ label, value, valuePrefix = '', suffix = '', sub, integer = false }: { label: string; value: number; valuePrefix?: string; suffix?: string; sub?: string; integer?: boolean }) {
+function Stat({ label, value, valuePrefix = '', suffix = '', sub, integer = false, loading = false }: { label: string; value: number; valuePrefix?: string; suffix?: string; sub?: string | React.ReactNode; integer?: boolean; loading?: boolean }) {
   const [display, setDisplay] = useState(0)
 
   useEffect(() => {
+    if (loading) return // Don't animate while loading
+    
     let frame: number
     const duration = 800
     const start = performance.now()
@@ -226,15 +264,15 @@ function Stat({ label, value, valuePrefix = '', suffix = '', sub, integer = fals
     }
     frame = requestAnimationFrame(step)
     return () => cancelAnimationFrame(frame)
-  }, [value])
+  }, [value, loading])
 
-  const formatted = integer ? Math.round(display).toLocaleString() : display.toFixed(2)
+  const formatted = loading ? "..." : (integer ? Math.round(display).toLocaleString() : display.toFixed(2))
 
   return (
     <div className="bg-white/60 backdrop-blur-md rounded-xl border border-slate-200 p-5 text-left">
       <div className="text-sm text-slate-600 mb-1">{label}</div>
       <div className="text-3xl font-extrabold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
-        {valuePrefix}{formatted}{suffix}
+        {loading ? "..." : `${valuePrefix}${formatted}${suffix}`}
       </div>
       {sub && <div className="text-slate-500 text-sm mt-1">{sub}</div>}
     </div>
