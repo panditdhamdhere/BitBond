@@ -100,10 +100,10 @@ export default function Analytics() {
       const protocolStats = await stacksClient.getProtocolStats()
       setStats({
         tvlBtc: protocolStats ? protocolStats.totalValueLocked / 100000000 : 0.15,
-        totalBonds: protocolStats ? protocolStats.totalBonds : 1250,
-        totalYieldBtc: protocolStats ? protocolStats.totalYield / 100000000 : 0.025,
-        insuranceBtc: protocolStats ? protocolStats.insurancePool / 100000000 : 0.005,
-        avgApy: protocolStats ? protocolStats.averageApy : 8.5,
+        totalBonds: protocolStats ? protocolStats.totalBondsCreated : 1250,
+        totalYieldBtc: protocolStats ? protocolStats.totalYieldDistributed / 100000000 : 0.025,
+        insuranceBtc: protocolStats ? protocolStats.insurancePoolBalance / 100000000 : 0.005,
+        avgApy: protocolStats ? protocolStats.averageAPY : 8.5,
         marketVolumeStx: protocolStats ? protocolStats.marketplaceVolume / 1000000 : 5.0,
       })
       

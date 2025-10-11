@@ -54,7 +54,7 @@ export function BondPortfolio() {
     refreshBonds,
     getActiveBonds,
     getMaturedBonds 
-  } = useBonds(address)
+  } = useBonds(address || undefined)
   
   const { withdrawBond, earlyExitBond } = useContract()
   
@@ -145,7 +145,7 @@ export function BondPortfolio() {
   const handleList = (bondId: number) => {
     console.log('List bond:', bondId)
     // This would open a modal to list the bond on marketplace
-    toast.info('Marketplace listing feature coming soon!')
+    toast('Marketplace listing feature coming soon!')
   }
 
   const getFilteredBonds = (): Bond[] => {
@@ -260,7 +260,7 @@ export function BondPortfolio() {
         <button
           onClick={() => {
             // This would scroll to the CreateBond component or switch tabs
-            toast.info('Navigate to Create Bond section')
+            toast('Navigate to Create Bond section')
           }}
           className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-orange-700 transition-all duration-200 flex items-center space-x-2 mx-auto shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
         >

@@ -7,63 +7,56 @@ export const DEMO_BONDS: Bond[] = [
     owner: 'ST12K3B03KFQNFSXSBWEBZG2CE0R75M4GRRJ73S72',
     amount: 1000000, // 0.01 sBTC
     lockPeriod: 30,
-    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 days ago
-    maturityDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000), // 20 days from now
+    createdAt: Math.floor((Date.now() - 10 * 24 * 60 * 60 * 1000) / 1000), // 10 days ago (unix timestamp)
+    maturityDate: Math.floor((Date.now() + 20 * 24 * 60 * 60 * 1000) / 1000), // 20 days from now (unix timestamp)
     apy: 5,
-    status: 'active',
-    currentBlockHeight: 100000
+    status: 'active'
   },
   {
     id: 2,
     owner: 'ST12K3B03KFQNFSXSBWEBZG2CE0R75M4GRRJ73S72',
     amount: 2500000, // 0.025 sBTC
     lockPeriod: 90,
-    createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
-    maturityDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000), // 60 days from now
+    createdAt: Math.floor((Date.now() - 30 * 24 * 60 * 60 * 1000) / 1000), // 30 days ago (unix timestamp)
+    maturityDate: Math.floor((Date.now() + 60 * 24 * 60 * 60 * 1000) / 1000), // 60 days from now (unix timestamp)
     apy: 8,
-    status: 'active',
-    currentBlockHeight: 100000
+    status: 'active'
   },
   {
     id: 3,
     owner: 'ST12K3B03KFQNFSXSBWEBZG2CE0R75M4GRRJ73S72',
     amount: 5000000, // 0.05 sBTC
     lockPeriod: 180,
-    createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000), // 60 days ago
-    maturityDate: new Date(Date.now() + 120 * 24 * 60 * 60 * 1000), // 120 days from now
+    createdAt: Math.floor((Date.now() - 60 * 24 * 60 * 60 * 1000) / 1000), // 60 days ago (unix timestamp)
+    maturityDate: Math.floor((Date.now() + 120 * 24 * 60 * 60 * 1000) / 1000), // 120 days from now (unix timestamp)
     apy: 12,
-    status: 'matured',
-    currentBlockHeight: 100000
+    status: 'active'
   }
 ]
 
 export const DEMO_LISTINGS: BondListing[] = [
   {
     id: 1,
-    bondId: 1,
     seller: 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM',
     price: 45000, // 0.045 STX
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-    status: 'active',
+    listedAt: 100000,
     bond: DEMO_BONDS[0]
   },
   {
     id: 2,
-    bondId: 2,
     seller: 'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG',
     price: 120000, // 0.12 STX
-    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-    status: 'active',
+    listedAt: 100500,
     bond: DEMO_BONDS[1]
   }
 ]
 
 export const DEMO_PROTOCOL_STATS: ProtocolStats = {
   totalValueLocked: 15000000, // 0.15 sBTC
-  totalBonds: 1250,
-  totalYield: 2500000, // 0.025 sBTC
-  insurancePool: 500000, // 0.005 sBTC
-  averageApy: 8.5,
+  totalBondsCreated: 1250,
+  totalYieldDistributed: 2500000, // 0.025 sBTC
+  insurancePoolBalance: 500000, // 0.005 sBTC
+  averageAPY: 8.5,
   marketplaceVolume: 5000000, // 5 STX
   activeBonds: 850,
   maturedBonds: 400,

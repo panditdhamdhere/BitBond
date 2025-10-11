@@ -36,8 +36,8 @@ export function useAuth() {
           
           // Format 1: Array format (Leather wallet)
           if (data?.addresses && Array.isArray(data.addresses)) {
-            const stxAddress = data.addresses.find((addr: any) => addr.type === 'stx')
-            const btcAddress = data.addresses.find((addr: any) => addr.type === 'btc')
+            const stxAddress = data.addresses.find((addr: { type: string; address: string }) => addr.type === 'stx')
+            const btcAddress = data.addresses.find((addr: { type: string; address: string }) => addr.type === 'btc')
             stxAddr = stxAddress?.address
             btcAddr = btcAddress?.address || null
           }
@@ -133,8 +133,8 @@ export function useAuth() {
       
       console.log('Connection successful:', response)
       
-      // Extract addresses from response - using any type to avoid TypeScript issues
-      const responseData = response as any
+      // Extract addresses from response
+      const responseData = response as { address?: string; addresses?: { stx?: Array<{ address: string }>; btc?: Array<{ address: string }> } | Array<{ address?: string }> }
       console.log('Full response data:', responseData)
       console.log('Addresses structure:', responseData.addresses)
       
@@ -148,12 +148,12 @@ export function useAuth() {
         // Some wallets return an array of address objects with varying keys.
         // We'll pick the first entry whose address looks like a Stacks address (SP... for mainnet, ST... for testnet).
         try {
-          const addressesArray = responseData.addresses as any[]
-          const stacksCandidate = addressesArray.find((entry: any) => {
+          const addressesArray = responseData.addresses as Array<{ address?: string }>
+          const stacksCandidate = addressesArray.find((entry: { address?: string }) => {
             const addr = entry?.address as string | undefined
             return typeof addr === 'string' && /^(SP|ST)[A-Z0-9]/i.test(addr)
           })
-          const btcCandidate = addressesArray.find((entry: any) => {
+          const btcCandidate = addressesArray.find((entry: { address?: string }) => {
             const addr = entry?.address as string | undefined
             return typeof addr === 'string' && /^(bc1|1|3)[a-zA-HJ-NP-Z0-9]/i.test(addr)
           })

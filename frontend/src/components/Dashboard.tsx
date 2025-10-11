@@ -20,7 +20,7 @@ import { stacksClient } from '../utils/stacksClient'
 
 export function Dashboard() {
   const { address } = useAuth()
-  const { portfolio, currentBlockHeight } = useBonds(address)
+  const { portfolio, currentBlockHeight } = useBonds(address || undefined)
   const [activeTab, setActiveTab] = useState<'portfolio' | 'create'>('portfolio')
 
   const tabs = [
@@ -106,7 +106,7 @@ export function Dashboard() {
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id as 'portfolio' | 'create')}
               className={`flex-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-md transition-all ${
                 activeTab === tab.id
                   ? 'bg-white shadow-sm text-slate-900'

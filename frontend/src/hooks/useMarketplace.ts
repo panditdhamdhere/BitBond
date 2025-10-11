@@ -125,7 +125,7 @@ export function useMarketplace() {
   }, [listings])
 
   // Sort listings
-  const sortListings = useCallback((sortBy: 'price' | 'maturity' | 'yield', order: 'asc' | 'desc' = 'asc') => {
+  const sortListings = useCallback((sortBy: 'price' | 'maturity' | 'yield' | 'discount', order: 'asc' | 'desc' = 'asc') => {
     const sorted = [...listings].sort((a, b) => {
       let aValue: number, bValue: number
 
@@ -141,6 +141,11 @@ export function useMarketplace() {
         case 'yield':
           aValue = a.bond.apy
           bValue = b.bond.apy
+          break
+        case 'discount':
+          // Calculate discount percentage for sorting
+          aValue = ((a.bond.currentValue || a.bond.amount) - a.price) / (a.bond.currentValue || a.bond.amount) * 100
+          bValue = ((b.bond.currentValue || b.bond.amount) - b.price) / (b.bond.currentValue || b.bond.amount) * 100
           break
         default:
           return 0

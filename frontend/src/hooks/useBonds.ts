@@ -86,7 +86,7 @@ export function useBonds(userAddress?: string) {
 
     const totalYield = bonds.reduce((sum, bond) => {
       if (bond.status === 'active' && isBondMatured(bond, currentBlockHeight)) {
-        return sum + calculateYield(bond.amount, bond.lockPeriod as any)
+        return sum + calculateYield(bond.amount, bond.lockPeriod as 30 | 90 | 180)
       }
       return sum
     }, 0)

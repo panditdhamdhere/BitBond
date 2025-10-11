@@ -84,3 +84,7 @@ jspm_packages/
 
 # Clarinet
 .clarinet/
+keychain.json
+
+# Vercel
+.vercel

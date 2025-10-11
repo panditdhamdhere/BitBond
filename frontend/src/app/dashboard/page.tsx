@@ -6,6 +6,9 @@ import ConnectWallet from '@/components/ConnectWallet'
 import { TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 /**
  * Dashboard Page - Protected Route
  * Shows user's bond portfolio

@@ -1,5 +1,8 @@
 'use client'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 import BondMarketplace from '@/components/BondMarketplace'
 import ConnectWallet from '@/components/ConnectWallet'
 import { TrendingUp } from 'lucide-react'

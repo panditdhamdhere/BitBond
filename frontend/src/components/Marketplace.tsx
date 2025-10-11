@@ -31,7 +31,7 @@ export function Marketplace() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [searchTerm, setSearchTerm] = useState('')
   const [filterPeriod, setFilterPeriod] = useState<string>('all')
-  const [sortBy, setSortBy] = useState<'price' | 'maturity' | 'yield'>('price')
+  const [sortBy, setSortBy] = useState<'price' | 'maturity' | 'yield' | 'discount'>('price')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
   const handleBuyBond = (listing: BondListing) => {
@@ -170,8 +170,8 @@ export function Marketplace() {
             value={`${sortBy}-${sortOrder}`}
             onChange={(e) => {
               const [field, order] = e.target.value.split('-')
-              setSortBy(field as any)
-              setSortOrder(order as any)
+              setSortBy(field as 'price' | 'discount' | 'maturity')
+              setSortOrder(order as 'asc' | 'desc')
             }}
             className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
           >

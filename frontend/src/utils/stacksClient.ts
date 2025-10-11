@@ -57,8 +57,8 @@ class StacksClient {
    * Get Stacks network object for transactions
    */
   private getStacksNetwork() {
-    // Minimal network object for read-only calls
-    return { url: this.network.url } as unknown as any
+    // Return the network name for read-only calls
+    return this.network.name
   }
 
   /**
@@ -550,6 +550,9 @@ class StacksClient {
       const [marketAddress, marketName] = this.contracts.bondMarketplace.split('.')
       const network = this.getStacksNetwork()
       
+      // eslint-disable-next-line no-console
+      console.log('Fetching protocol stats from contracts...', { vaultAddress, vaultName, marketAddress, marketName })
+      
       // Get vault stats
       const vaultStats = await fetchCallReadOnlyFunction({
         contractAddress: vaultAddress,
@@ -570,14 +573,20 @@ class StacksClient {
         senderAddress: marketAddress,
       })
       
+      // eslint-disable-next-line no-console
+      console.log('Raw contract responses:', { vaultStats, marketStats })
+      
       const vaultJson = cvToJSON(vaultStats)
       const marketJson = cvToJSON(marketStats)
+      
+      // eslint-disable-next-line no-console
+      console.log('Parsed contract responses:', { vaultJson, marketJson })
       
       if (vaultJson.success && vaultJson.value && marketJson.success && marketJson.value) {
         const vault = vaultJson.value
         const market = marketJson.value
         
-        return {
+        const stats = {
           totalValueLocked: Number(vault['total-tvl']) || 0,
           totalBondsCreated: Number(vault['total-bonds']) || 0,
           activeBonds: Number(vault['total-bonds']) || 0,
@@ -588,8 +597,14 @@ class StacksClient {
           averageAPY: Number(vault['average-apy']) / 100 || 5,
           marketplaceVolume: Number(market['total-volume']) || 0,
         }
+        
+        // eslint-disable-next-line no-console
+        console.log('Returning real contract stats:', stats)
+        return stats
       }
       
+      // eslint-disable-next-line no-console
+      console.log('Contract calls failed, falling back to demo data')
       return DEMO_PROTOCOL_STATS
     } catch (error) {
       // eslint-disable-next-line no-console

@@ -72,7 +72,7 @@ export interface ContractCallResult {
   success: boolean
   txId?: string
   error?: string
-  data?: any
+  data?: unknown
 }
 
 export interface LoadingState {
@@ -88,4 +88,16 @@ export interface BondMetadata {
     trait_type: string
     value: string | number
   }[]
+}
+
+export interface ProtocolStats {
+  totalValueLocked: number
+  totalBondsCreated: number
+  activeBonds: number
+  maturedBonds: number
+  listedBonds: number
+  totalYieldDistributed: number
+  insurancePoolBalance: number
+  averageAPY: number
+  marketplaceVolume: number
 }
